@@ -2,10 +2,10 @@
 require File.expand_path('../lib/psql_logger/version', __FILE__)
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["TODO: Write your name"]
+  gem.authors       = ["Tereza Cihelkova"]
   gem.email         = ["tereza.cihelkova@gooddata.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{Helper for logging into postgresql database}
+  gem.summary       = %q{Helper for logging into postgresql database}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
@@ -15,6 +15,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = PsqlLogger::VERSION
 
-  s.add_dependency('pry')
-  s.add_dependency('pg')
+  gem.add_dependency('pry')
+  gem.add_dependency('pg')
 end

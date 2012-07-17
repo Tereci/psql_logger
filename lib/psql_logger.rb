@@ -1,6 +1,7 @@
 require "psql_logger/version"
 require 'pg'
 
+# Use for logging into postgresql database. log_start method should be always called first and log_end last unless run finishes with error - then call log_error with continue_on_error set to false as a last called method. run_id gets initialized in initialize method only in some edge cases - usually when previous run of logger for given pid wasn't used correctly and main task is still in state RUNNING. If the task is not RUNNING (which is how it should correctly be) run_id is initialized as late as in call of log_start. log_end and log_error with parameter continue_on_error set to false close connection to database.
 module GDC
   class PsqlLogger
     
