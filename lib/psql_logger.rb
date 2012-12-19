@@ -1,5 +1,6 @@
 require "psql_logger/version"
 require 'pg'
+require 'socket'
 
 # Use for logging into postgresql database. log_start method should be always called first and log_end last unless run finishes with error - then call log_error with continue_on_error set to false as a last called method. run_id gets initialized in initialize method only in some edge cases - usually when previous run of logger for given pid wasn't used correctly and main task is still in state RUNNING. If the task is not RUNNING (which is how it should correctly be) run_id is initialized as late as in call of log_start. log_end and log_error with parameter continue_on_error set to false close connection to database.
 module GDC
@@ -19,32 +20,33 @@ module GDC
       }
       @connection = PG::Connection.new(@connection_hash)
       @run_id = @connection.exec("select log.run_id('#{@pid}')").values[0][0]
+      @local_hostname = options[:local_hostname] || Socket.gethostname
     end
     
     def log_start()
-      @run_id = @connection.exec("select log.log('#{@pid}',null,'#{@task}','ETL','RUNNING','#{@task} RUNNING','',null);").values[0][0]
+      @run_id = @connection.exec("select log.log('#{@pid}',null,'#{@task}','ETL','RUNNING','#{@task} RUNNING','',null,'#{@local_hostname');").values[0][0]
     end
     
     def log_end(status='OK', message='')
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
-      @connection.exec("select log.log_status(#{@run_id},'#{@task}','#{status}','#{@task} #{status} #{message}',0);")
+      @connection.exec("select log.log_status(#{@run_id},'#{@task}','#{status}','#{@task} #{status} #{message}',0,'#{@local_hostname');")
       @connection.close
     end
     
     def log_step_start(step)
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
-      @connection.exec("select log.log('#{@pid}',#{@run_id},'#{step}','ETL','RUNNING','#{step} RUNNING','',null);")
+      @connection.exec("select log.log('#{@pid}',#{@run_id},'#{step}','ETL','RUNNING','#{step} RUNNING','',null,'#{@local_hostname');")
     end
     
     def log_step_end(step)
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
-      @connection.exec("select log.log_status(#{@run_id},'#{step}','OK','#{step} OK',0);")
+      @connection.exec("select log.log_status(#{@run_id},'#{step}','OK','#{step} OK',0,'#{@local_hostname');")
     end
     
     def log_error(step, message, continue_on_error=false)
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
       status = continue_on_error ? 'WARNING' : 'ERROR'
-      @connection.exec("select log.log_status(#{@run_id},'#{step}','#{status}','#{step} #{status} #{message}',0);")
+      @connection.exec("select log.log_status(#{@run_id},'#{step}','#{status}','#{step} #{status} #{message}',0,'#{@local_hostname');")
       log_end(status, message) unless continue_on_error
     end
     
