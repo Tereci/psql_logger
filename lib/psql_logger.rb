@@ -24,29 +24,29 @@ module GDC
     end
     
     def log_start()
-      @run_id = @connection.exec("select log.log('#{@pid}',null,'#{@task}','ETL','RUNNING','#{@task} RUNNING','',null,'#{@local_hostname');").values[0][0]
+      @run_id = @connection.exec("select log.log('#{@pid}',null,'#{@task}','ETL','RUNNING','#{@task} RUNNING','',null,'#{@local_hostname}');").values[0][0]
     end
     
     def log_end(status='OK', message='')
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
-      @connection.exec("select log.log_status(#{@run_id},'#{@task}','#{status}','#{@task} #{status} #{message}',0,'#{@local_hostname');")
+      @connection.exec("select log.log_status(#{@run_id},'#{@task}','#{status}','#{@task} #{status} #{message}',0,'#{@local_hostname}');")
       @connection.close
     end
     
     def log_step_start(step)
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
-      @connection.exec("select log.log('#{@pid}',#{@run_id},'#{step}','ETL','RUNNING','#{step} RUNNING','',null,'#{@local_hostname');")
+      @connection.exec("select log.log('#{@pid}',#{@run_id},'#{step}','ETL','RUNNING','#{step} RUNNING','',null,'#{@local_hostname}');")
     end
     
     def log_step_end(step)
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
-      @connection.exec("select log.log_status(#{@run_id},'#{step}','OK','#{step} OK',0,'#{@local_hostname');")
+      @connection.exec("select log.log_status(#{@run_id},'#{step}','OK','#{step} OK',0,'#{@local_hostname}');")
     end
     
     def log_error(step, message, continue_on_error=false)
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
       status = continue_on_error ? 'WARNING' : 'ERROR'
-      @connection.exec("select log.log_status(#{@run_id},'#{step}','#{status}','#{step} #{status} #{message}',0,'#{@local_hostname');")
+      @connection.exec("select log.log_status(#{@run_id},'#{step}','#{status}','#{step} #{status} #{message}',0,'#{@local_hostname}');")
       log_end(status, message) unless continue_on_error
     end
     
