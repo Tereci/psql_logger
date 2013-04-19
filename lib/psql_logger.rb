@@ -50,5 +50,7 @@ module GDC
       log_end(status, message) unless continue_on_error
     end
     
-  end
+    def log_execution(pid,graph_name,mode,status,detailed_status)
+      @connection.exec("select log.log_execution('#{pid}','#{graph_name}','#{mode}','#{status}','#{detailed_status}');")
+    end
 end
