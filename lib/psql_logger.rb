@@ -25,11 +25,13 @@ module GDC
     
     def log_start()
       @run_id = @connection.exec("select log.log('#{@pid}',null,'#{@task}','ETL','RUNNING','#{@task} RUNNING','',null,'#{@local_hostname}');").values[0][0]
+      result = log_execution(@pid,'STARTED',"#{@task} RUNNING")
     end
     
     def log_end(status='OK', message='')
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
       @connection.exec("select log.log_status(#{@run_id},'#{@task}','#{status}','#{@task} #{status} #{message}',0,'#{@local_hostname}');")
+      result = log_execution(@pid,'FINISHED',"#{@task} #{status} #{message}")
       @connection.close
     end
     
@@ -47,10 +49,17 @@ module GDC
       fail "Run id is empty - you have to call log_start_task first." if @run_id.nil?
       status = continue_on_error ? 'WARNING' : 'ERROR'
       @connection.exec("select log.log_status(#{@run_id},'#{step}','#{status}','#{step} #{status} #{message}',0,'#{@local_hostname}');")
+      result = log_execution(@pid,'ERROR',"#{step} #{status} #{message}")
       log_end(status, message) unless continue_on_error
     end
     
-    def log_execution(pid,graph_name,mode,status,detailed_status)
-      @connection.exec("select log.log_execution('#{pid}','#{graph_name}','#{mode}','#{status}','#{detailed_status}');")
+    def log_execution(pid,status,detailed_status)
+      @connection.exec("select log2.log_execution('#{pid}','app','','#{status}','#{detailed_status}',NULL);")
     end
+    
+    
+    
+    
+    
+    
 end
