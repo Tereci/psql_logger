@@ -21,6 +21,7 @@ module GDC
       @connection = PG::Connection.new(@connection_hash)
       @run_id = @connection.exec("select log.run_id('#{@pid}')").values[0][0]
       @local_hostname = options[:local_hostname] || Socket.gethostname
+      @mode = options[:mode]
     end
     
     def log_start()
@@ -54,7 +55,7 @@ module GDC
     end
     
     def log_execution(pid,status,detailed_status)
-      @connection.exec("select log2.log_execution('#{pid}','app','','#{status}','#{detailed_status}',NULL);")
+      @connection.exec("select log2.log_execution('#{pid}','app','#{@mode}','#{status}','#{detailed_status}',NULL);")
     end
     
     
