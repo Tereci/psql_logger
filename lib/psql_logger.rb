@@ -51,7 +51,7 @@ module GDC
       status = continue_on_error ? 'WARNING' : 'ERROR'
       @connection.exec("select log.log_status(#{@run_id},'#{step}','#{status}','#{step} #{status} #{message}',0,'#{@local_hostname}');")
       result = log_execution(@pid,'ERROR',"#{step} #{status} #{message}")
-      log_end(status, message) unless continue_on_error
+      #log_end(status, message) unless continue_on_error
     end
     
     def log_execution(pid,status,detailed_status)
